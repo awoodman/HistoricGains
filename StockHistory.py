@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import requests
 import json
 from datetime import datetime
@@ -5,8 +6,9 @@ from alpha_vantage.timeseries import TimeSeries
 
 # Fetch all data
 URL = "https://www.alphavantage.co/query"
-key = 'LEU4ECTWL6XRRGPU'
-
+keyFile = open('alphaVantageApiKey.txt','r')
+key = keyFile.readline()
+#key = 'LEU4ECTWL6XRRGPU'
 
 # Calculations
 currMonth = datetime.now().month
