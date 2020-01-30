@@ -15,12 +15,16 @@ currMonth = datetime.now().month
 
 # Initialization
 totalInvested = 0
-sharesPurchased = 0
+sharesPurchasedMonthly = 0
+sharesPurchasedTotal = 0
 dollarsPerMonthInvested = 0
 yearsOfHistory = 0
 monthsOfHistory = 0
 startYear = 0
 validOption = True
+
+# Header
+print("*** Dollar Cost Averaging Calculator ***\n")
 
 # Menu Options
 menuOption = input("Choose an option: \n1. Previous N years of history\n2. Specific date range\n")
@@ -32,21 +36,33 @@ sortedKeys = sorted(stockHistory)
 totalEnt = len(stockHistory)
 
 if (int(menuOption) == 1):
-	yearsOfHistory = int(input("How many years of history? "))
+	yearsOfHistory = int(input("Enter years of history: "))
 	monthsOfHistory = yearsOfHistory * 12
-	dollarsPerMonthInvested = int(input("How many dollars per month invested? "))
+	dollarsPerMonthInvested = int(input("Enter dollars per month invested: $"))
 	startYear = datetime.now().year - yearsOfHistory
 	# Get the last N months of data, ending on the last day of last month
 	tradeDates = sortedKeys[(totalEnt - monthsOfHistory - 1):-1]
+	leftOverCash = 0
 	for tradeDate in tradeDates:
-		totalInvested = totalInvested + dollarsPerMonthInvested
-		sharePrice = float(stockHistory[tradeDate]['1. open'])
-		sharesPurchased = sharesPurchased + (dollarsPerMonthInvested / sharePrice)
+		# OLD
+		#totalInvested = totalInvested + dollarsPerMonthInvested
+		#sharePrice = float(stockHistory[tradeDate]['1. open'])
+		#sharesPurchasedTotal = sharesPurchasedTotal + (dollarsPerMonthInvested / sharePrice)
+		
+		# NEW	
+		amountToInvestDuringMonth = leftOverCash + dollarsPerMonthInvested
+		sharedPurchasedDuringMonth = int(amountToInvest / sharePrice)
+		sharesPurchasedTotal = sharesPurchasedTotal + sharesPurchasedDuringMonth
+		totalInvested = totalInvested + (sharePrice * sharesPurchasedDuringMonth)
+		leftOverCash = amountToInvest % sharePrice
+		print("Amount to invest: %.2f, Whole share cost: %.2f, left over: %.2f" % (amountToInvest, sharePrice, leftOverCash))
+		print("Total Invested: %.2f" % totalInvested)	
 elif (int(menuOption) == 2):
-	startYear = input("Choose starting year (format YYYY): ")
-	yearsOfHistory = int(input("Choose years of duration: "))
-	dollarsPerMonthInvested = int(input("How many dollars per month invested? "))
+	startYear = input("Enter starting year (format YYYY): ")
+	yearsOfHistory = int(input("Enter duration (years): "))
+	dollarsPerMonthInvested = int(input("Enter dollars per month invested: $ "))
 	monthsOfHistory = 12 * yearsOfHistory
+	# Last business day in month varies
 	for day in range(25, 32):
 		try:
 			startIndex = sortedKeys.index("%s-01-%s" % (startYear, day))
@@ -56,20 +72,25 @@ elif (int(menuOption) == 2):
 			"Found Index"
 			break
 	tradeDates = sortedKeys[startIndex:(startIndex + monthsOfHistory)]
+	print("Dates Traded: %s" % tradeDates)
 	for tradeDate in tradeDates:
 		totalInvested = totalInvested + dollarsPerMonthInvested
 		sharePrice = float(stockHistory[tradeDate]['1. open'])
-		sharesPurchased = sharesPurchased + (dollarsPerMonthInvested / sharePrice)
+		sharesPurchasedTotal = sharesPurchasedTotal + (dollarsPerMonthInvested / sharePrice)
 else:
-	print("Invalid option chosen")
+	print("Invalid option chosen, try again...")
 	validOption = False
 
 if (validOption):
 	# Print results
-	totalCurrValue = sharesPurchased * float(stockHistory[sortedKeys[totalEnt - 1]]['1. open'])
+	totalCurrValue = sharesPurchasedTotal * float(stockHistory[sortedKeys[totalEnt - 1]]['1. open'])
 	netGain = totalCurrValue - totalInvested
 	percentGain = 100 * netGain / totalInvested
-	print("\nResults for investing $%s/mo in %s for %s years, starting in %s:" % (dollarsPerMonthInvested, symbol, yearsOfHistory, startYear))
-	print("- Total money invested: $%s (%s shares)" % (totalInvested, sharesPurchased))
-	print("- Current Total Worth: $%s" % totalCurrValue)
-	print("- You have made $%s, which is a %s percent gain" % (str(netGain), str(percentGain)))
+	if (int(menuOption) == 1):
+		print("\nResults for investing $%s/mo in %s for %s years, starting in %s:" % (dollarsPerMonthInvested, symbol, yearsOfHistory, startYear))
+	else:
+		print("\nResults for investing $%s/mo in %s for %s years, starting in January %s:" % (dollarsPerMonthInvested, symbol, yearsOfHistory, startYear))
+	print("- Total money invested: $%.2f (%s shares)" % (totalInvested, sharesPurchasedTotal))
+	print("- Current Total Worth: $%.2f" % totalCurrValue)
+	percentSymbol = "%"
+	print("- You have made $%.2f (%.1f%s gain)" % (netGain, percentGain, str(percentSymbol)))
