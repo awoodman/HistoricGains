@@ -8,7 +8,6 @@ from alpha_vantage.timeseries import TimeSeries
 URL = "https://www.alphavantage.co/query"
 keyFile = open('alphaVantageApiKey.txt','r')
 key = keyFile.readline()
-#key = 'LEU4ECTWL6XRRGPU'
 
 # Calculations
 currMonth = datetime.now().month
@@ -44,19 +43,12 @@ if (int(menuOption) == 1):
 	tradeDates = sortedKeys[(totalEnt - monthsOfHistory - 1):-1]
 	leftOverCash = 0
 	for tradeDate in tradeDates:
-		# OLD
-		#totalInvested = totalInvested + dollarsPerMonthInvested
-		#sharePrice = float(stockHistory[tradeDate]['1. open'])
-		#sharesPurchasedTotal = sharesPurchasedTotal + (dollarsPerMonthInvested / sharePrice)
-		
-		# NEW	
+		sharePrice = float(stockHistory[tradeDate]['1. open'])
 		amountToInvestDuringMonth = leftOverCash + dollarsPerMonthInvested
-		sharedPurchasedDuringMonth = int(amountToInvest / sharePrice)
+		sharesPurchasedDuringMonth = int(amountToInvestDuringMonth / sharePrice)
 		sharesPurchasedTotal = sharesPurchasedTotal + sharesPurchasedDuringMonth
 		totalInvested = totalInvested + (sharePrice * sharesPurchasedDuringMonth)
-		leftOverCash = amountToInvest % sharePrice
-		print("Amount to invest: %.2f, Whole share cost: %.2f, left over: %.2f" % (amountToInvest, sharePrice, leftOverCash))
-		print("Total Invested: %.2f" % totalInvested)	
+		leftOverCash = amountToInvestDuringMonth % sharePrice
 elif (int(menuOption) == 2):
 	startYear = input("Enter starting year (format YYYY): ")
 	yearsOfHistory = int(input("Enter duration (years): "))
@@ -72,7 +64,6 @@ elif (int(menuOption) == 2):
 			"Found Index"
 			break
 	tradeDates = sortedKeys[startIndex:(startIndex + monthsOfHistory)]
-	print("Dates Traded: %s" % tradeDates)
 	for tradeDate in tradeDates:
 		totalInvested = totalInvested + dollarsPerMonthInvested
 		sharePrice = float(stockHistory[tradeDate]['1. open'])
