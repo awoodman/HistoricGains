@@ -38,9 +38,10 @@ def readInputFile():
         inData = []
         inFile = open("StockCombinations.csv", "r")
         for line in inFile:
-                newLine = line.split(",")
-                print("inFile: %s,%s,%s,%s" % (newLine[0].strip(), newLine[1].strip(), newLine[2].strip(), newLine[3].strip()))
-                inData.append({"symbol":newLine[0].strip(), "numYears":newLine[1].strip(), "startYear":newLine[2].strip(), "investPerMonth":newLine[3].strip()})
+                if (not line.startswith("#")):
+                     newLine = line.split(",")
+                     print("inFile: %s,%s,%s,%s" % (newLine[0].strip(), newLine[1].strip(), newLine[2].strip(), newLine[3].strip()))
+                     inData.append({"symbol":newLine[0].strip(), "numYears":newLine[1].strip(), "startYear":newLine[2].strip(), "investPerMonth":newLine[3].strip()})
         return inData
 
 def getStockHistory(stockSym = None):
@@ -141,7 +142,7 @@ if (int(menuOption) == 1):
 		tradeDates = sortedKeys[startIndex:endIndex]
 		for tradeDate in tradeDates:
 			sharesPurchasedTotal, totalInvested, leftOverCash = purchaseShares(stockHistory, tradeDate, leftOverCash, dollarsPerMonthInvested, sharesPurchasedTotal, totalInvested)
-		printResults(sharesPurchasedTotal, stockHistory, sortedKeys, totalEnt, totalInvested, menuOption, symbol, sortedKeys[(totalEnt - monthsOfHistory - 1)], sortedKeys[endIndex])
+		printResults(sharesPurchasedTotal, stockHistory, sortedKeys, totalEnt, totalInvested, menuOption, symbol, sortedKeys[startIndex], sortedKeys[endIndex])
 	else:
 		print("Not enough history for this stock from API, try a shorter time period")
 		
@@ -202,7 +203,7 @@ elif (int(menuOption) == 3):
 			for tradeDate in tradeDates:
 				sharesPurchasedTotal, totalInvested, leftOverCash = purchaseShares(stockHistory, tradeDate, leftOverCash, dollarsPerMonthInvested, sharesPurchasedTotal, totalInvested)
 
-			printResults(sharesPurchasedTotal, stockHistory, sortedKeys, totalEnt, totalInvested, menuOption, symbol, sortedKeys[(totalEnt - monthsOfHistory - 1)], sortedKeys[-1])
+			printResults(sharesPurchasedTotal, stockHistory, sortedKeys, totalEnt, totalInvested, menuOption, symbol, sortedKeys[startIndex], sortedKeys[endIndex])
 			# API seems to like some wait time between requests
 			time.sleep(1)
 		else:
